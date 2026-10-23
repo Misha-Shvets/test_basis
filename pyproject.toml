@@ -1,0 +1,45 @@
+[project]
+name = "payment-system"
+version = "0.1.0"
+description = "Payment system foundation"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.14,<2.0",
+    "dishka>=1.6,<2.0",
+    "fastapi>=0.115,<1.0",
+    "faststream[rabbit,cli]>=0.5,<1.0",
+    "httpx>=0.28,<1.0",
+    "psycopg[binary]>=3.2,<4.0",
+    "sqlalchemy[asyncio]>=2.0,<3.0",
+    "uvicorn[standard]>=0.34,<1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.13,<2.0",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.25",
+    "ruff==0.11.9",
+    "uv>=0.6,<1.0",
+]
+
+[project.scripts]
+payment-api = "main:run"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true
+mypy_path = ["app"]
+explicit_package_bases = true
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint.isort]
+known-first-party = ["api", "config", "infra", "ioc", "payment"]
+
+[tool.pytest.ini_options]
+pythonpath = ["app", "."]
+asyncio_mode = "auto"
