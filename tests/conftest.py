@@ -1,7 +1,6 @@
 """Shared test configuration and Dishka fixtures."""
 
 from collections.abc import AsyncIterator
-import os
 
 import httpx
 import pytest
@@ -10,7 +9,6 @@ from dishka import (
     AsyncContainer,
     Provider,
     Scope,
-    from_context,
     make_async_container,
     provide,
 )
@@ -35,9 +33,15 @@ from infra.db.session import (
     create_session_factory,
     session_scope,
 )
-from main import create_basic_app
 from payment.ports import PaymentRepository
 from payment.services import PaymentService
+
+TEST_SETTINGS = Settings(
+    database_url="postgresql+psycopg://payments:payments@postgres:5432/payments",
+    rabbit_url="amqp://guest:guest@rabbitmq:5672/",
+    api_key="test-api-key",
+    debug=True,
+)
 
 
 class TestProvider(Provider):
@@ -45,7 +49,11 @@ class TestProvider(Provider):
 
     __test__ = False
     scope = Scope.RUNTIME
-    settings = from_context(provides=Settings, scope=Scope.RUNTIME)
+
+    @provide(scope=Scope.RUNTIME)
+    def settings(self) -> Settings:
+        """Provide settings for the test environment."""
+        return TEST_SETTINGS
 
     @provide(scope=Scope.APP)
     def engine(self, settings: Settings) -> AsyncEngine:
@@ -84,13 +92,7 @@ class TestProvider(Provider):
 @pytest.fixture(scope="session")
 def settings() -> Settings:
     """Provide PostgreSQL settings for integration tests."""
-    return Settings(
-        database_url=os.getenv(
-            "TEST_DATABASE_URL",
-            "postgresql+psycopg://payments:payments@localhost:5432/payments",
-        ),
-        api_key="test-api-key",
-    )
+    return TEST_SETTINGS
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -98,7 +100,6 @@ async def container(settings: Settings) -> AsyncIterator[AsyncContainer]:
     """Create one test DI container for the test session."""
     test_container = make_async_container(
         TestProvider(),
-        context={Settings: settings},
         start_scope=Scope.RUNTIME,
     )
     yield test_container
@@ -146,6 +147,8 @@ async def app(
     container: AsyncContainer,
 ) -> AsyncIterator[FastAPI]:
     """Create an API application with the test DI container."""
+    from main import create_basic_app
+
     application = create_basic_app(settings)
     setup_dishka(container, application)
     yield application

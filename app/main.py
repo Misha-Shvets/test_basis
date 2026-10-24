@@ -51,6 +51,3 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 def run() -> None:
     """Run the development server."""
     uvicorn.run("main:create_app", factory=True, reload=True)
-
-
-app = create_app()

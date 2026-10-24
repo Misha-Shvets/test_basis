@@ -66,7 +66,7 @@ curl http://localhost:8000/api/v1/payments/<payment_id> \
 ```bash
 uv sync --extra dev
 PYTHONPATH=app uv run alembic upgrade head
-PYTHONPATH=app uv run uvicorn main:app --reload
+PYTHONPATH=app uv run uvicorn main:create_app --factory --reload
 ```
 
 Consumer запускается отдельно:
