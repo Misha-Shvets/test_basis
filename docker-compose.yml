@@ -2,10 +2,8 @@ services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: payments
-      POSTGRES_USER: payments
-      POSTGRES_PASSWORD: payments
+    env_file:
+      - local.env
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U payments -d payments"]
       interval: 5s
@@ -31,8 +29,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      DATABASE_URL: postgresql+psycopg://payments:payments@postgres:5432/payments
+    env_file:
+      - local.env
     command: ["alembic", "upgrade", "head"]
     restart: on-failure:5
     depends_on:
@@ -43,10 +41,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      DATABASE_URL: postgresql+psycopg://payments:payments@postgres:5432/payments
-      DEBUG: "true"
-      API_KEY: test-api-key
+    env_file:
+      - local.env
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -58,10 +54,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      DATABASE_URL: postgresql+psycopg://payments:payments@postgres:5432/payments
-      RABBIT_URL: amqp://guest:guest@rabbitmq:5672/
-      API_KEY: test-api-key
+    env_file:
+      - local.env
     restart: unless-stopped
     command: ["faststream", "run", "worker:app"]
     depends_on:

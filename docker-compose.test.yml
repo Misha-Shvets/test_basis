@@ -5,14 +5,10 @@ services:
       dockerfile: Dockerfile
     restart: "no"
     working_dir: /app
+    env_file:
+      - local.env
     volumes:
-      - ./app:/app/app
       - ./tests:/app/tests
-    environment:
-      DATABASE_URL: postgresql+psycopg://payments:payments@postgres:5432/payments
-      PYTHONPATH: /app/app
-      TEST_DATABASE_URL: postgresql+psycopg://payments:payments@postgres:5432/payments
-      API_KEY: test-api-key
     command: ["sh", "-c", "uv sync --extra dev --no-install-project && python -m pytest -q"]
     depends_on:
       postgres:
@@ -21,10 +17,8 @@ services:
   postgres:
     image: postgres:16-alpine
     restart: "no"
-    environment:
-      POSTGRES_DB: payments
-      POSTGRES_USER: payments
-      POSTGRES_PASSWORD: payments
+    env_file:
+      - local.env
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U payments -d payments"]
       interval: 5s

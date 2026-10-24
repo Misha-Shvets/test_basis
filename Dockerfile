@@ -14,9 +14,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 COPY pyproject.toml ./
 RUN uv sync --no-install-project
 
-COPY app ./app
-COPY alembic.ini ./app/
+COPY app ./
+COPY alembic.ini ./
 
-WORKDIR /app/app
+WORKDIR /app
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

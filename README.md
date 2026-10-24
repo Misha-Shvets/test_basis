@@ -65,9 +65,8 @@ curl http://localhost:8000/api/v1/payments/<payment_id> \
 
 ```bash
 uv sync --extra dev
-cd app
-uv run alembic upgrade head
-uv run uvicorn main:app --reload
+PYTHONPATH=app uv run alembic upgrade head
+PYTHONPATH=app uv run uvicorn main:app --reload
 ```
 
 Consumer запускается отдельно:
@@ -94,5 +93,3 @@ make migrate
 ```bash
 make migration message="add payment field"
 ```
-p.s
-Сделал все без env/local.env для упрощения запуска и тестирования
